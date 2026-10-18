@@ -1,0 +1,40 @@
+# Optimized Cloud Build for invio-invoice-processing-agent-demo (Cloud Run).
+#
+# Why this exists: `gcloud run deploy --source .` rebuilds the image on a fresh
+# worker every time, re-running `npm ci` + `uv sync` from scratch even for a
+# one-line UI change — that is the deploy slowness. This config caches image
+# layers in Artifact Registry (Kaniko) so unchanged dependency layers are reused
+# across builds, and uses a higher-CPU worker. The FIRST run seeds the cache
+# (still slow once); later builds are much faster when only source changed.
+#
+# This config BUILDS + PUSHES only (no deploy step) so it needs no extra IAM on
+# the Cloud Build service account. Deploy the freshly built image with your own
+# credentials in a second step.
+#
+# Two-step deploy:
+#   1. gcloud builds submit --config cloudbuild.yaml --project <YOUR_GCP_PROJECT_ID> .
+#   2. gcloud run deploy invio-invoice-processing-agent-demo \
+#        --image us-west1-docker.pkg.dev/<YOUR_GCP_PROJECT_ID>/cloud-run-source-deploy/invio-invoice-processing-agent-demo:latest \
+#        --region us-west1 --project <YOUR_GCP_PROJECT_ID>
+#
+# Step 2 on an existing service only swaps the image — service account, env
+# vars, --allow-unauthenticated, CPU allocation and min/max instances are kept.
+
+steps:
+  # Build with cross-build layer cache. npm ci + uv sync are reused when
+  # package-lock.json / uv.lock are unchanged; only source layers rebuild.
+  - name: 'gcr.io/kaniko-project/executor:latest'
+    args:
+      - '--dockerfile=Dockerfile'
+      - '--context=dir:///workspace'
+      - '--destination=us-west1-docker.pkg.dev/$PROJECT_ID/cloud-run-source-deploy/invio-invoice-processing-agent-demo:$BUILD_ID'
+      - '--destination=us-west1-docker.pkg.dev/$PROJECT_ID/cloud-run-source-deploy/invio-invoice-processing-agent-demo:latest'
+      - '--cache=true'
+      - '--cache-ttl=336h'
+      - '--cache-repo=us-west1-docker.pkg.dev/$PROJECT_ID/cloud-run-source-deploy/invio-invoice-processing-agent-demo-cache'
+
+options:
+  machineType: 'E2_HIGHCPU_8'
+  logging: CLOUD_LOGGING_ONLY
+
+timeout: '1800s'

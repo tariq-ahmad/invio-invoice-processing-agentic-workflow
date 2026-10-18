@@ -1,0 +1,15 @@
+name: "invoice-processing-agent"
+acli_version: "0.5.0"
+agent_directory: "app"
+region: "us-west1"
+base_template: "adk"
+generated_at: "2026-06-16T11:39:38.061292+00:00"
+language: "python"
+create_params:
+  deployment_target: "none"
+  session_type: "in_memory"
+  cicd_runner: "skip"
+  include_data_ingestion: false
+  
+  datastore: "none"
+  agent_guidance_filename: "CLAUDE.md"

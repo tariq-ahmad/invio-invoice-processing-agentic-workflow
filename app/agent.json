@@ -1,0 +1,25 @@
+{
+  "name": "Invoice Processing Agent",
+  "description": "Accounts-payable invoice pipeline (ADK graph workflow): AgentMail intake, PDF extraction with source-grounded evidence, deterministic AP validation (duplicates, reconciliation, thresholds), human-in-the-loop approval, spend classification, and posting to SAP or Coupa with vendor rejection emails.",
+  "url": "https://YOUR_CLOUD_RUN_SERVICE_URL/a2a/app",
+  "version": "0.1.0",
+  "capabilities": {
+    "streaming": true
+  },
+  "defaultInputModes": ["text/plain", "application/pdf"],
+  "defaultOutputModes": ["text/plain"],
+  "skills": [
+    {
+      "id": "process_invoice",
+      "name": "Process invoice",
+      "description": "Fetch the latest invoice email, extract fields, validate against AP rules, route for human approval, and post to the correct financial system.",
+      "tags": ["invoice", "accounts-payable", "extraction", "validation", "sap", "coupa"]
+    },
+    {
+      "id": "hitl_decision",
+      "name": "Human-in-the-loop decision",
+      "description": "Apply an approve/reject/revise decision to an invoice awaiting review, then complete posting or send a vendor rejection email.",
+      "tags": ["approval", "hitl", "rejection-email"]
+    }
+  ]
+}

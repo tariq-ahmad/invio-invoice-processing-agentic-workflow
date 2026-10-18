@@ -1,0 +1,19 @@
+frontend/node_modules
+frontend/.vite
+frontend/dist
+.venv
+__pycache__
+**/__pycache__
+*.pyc
+*.pyo
+.git
+.gitignore
+tests/
+*.md
+!README.md
+.env
+.env.*
+
+# Secrets
+client_secret_*.json
+*_token.json

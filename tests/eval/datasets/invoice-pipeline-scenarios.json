@@ -1,0 +1,161 @@
+{
+  "eval_cases": [
+    {
+      "eval_case_id": "inbox_empty_no_invoice",
+      "prompt": {
+        "role": "user",
+        "parts": [{"text": "Process the latest invoice."}]
+      }
+    },
+    {
+      "eval_case_id": "straight_through_direct_spend",
+      "prompt": {
+        "role": "user",
+        "parts": [{"text": "Process the latest invoice."}]
+      }
+    },
+    {
+      "eval_case_id": "straight_through_indirect_spend",
+      "prompt": {
+        "role": "user",
+        "parts": [{"text": "Process the latest invoice."}]
+      }
+    },
+    {
+      "eval_case_id": "hitl_approve_high_value",
+      "agent_data": {
+        "turns": [
+          {
+            "turn_index": 0,
+            "events": [
+              {"author": "user", "content": {"role": "user", "parts": [{"text": "Process the latest invoice."}]}}
+            ]
+          },
+          {
+            "turn_index": 1,
+            "events": [
+              {"author": "user", "content": {"role": "user", "parts": [{"text": "approve"}]}}
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "eval_case_id": "duplicate_invoice_number_escalation",
+      "prompt": {
+        "role": "user",
+        "parts": [{"text": "Process the latest invoice."}]
+      }
+    },
+    {
+      "eval_case_id": "duplicate_po_escalation",
+      "prompt": {
+        "role": "user",
+        "parts": [{"text": "Process the latest invoice."}]
+      }
+    },
+    {
+      "eval_case_id": "hitl_reject_send_missing_po",
+      "agent_data": {
+        "turns": [
+          {
+            "turn_index": 0,
+            "events": [
+              {"author": "user", "content": {"role": "user", "parts": [{"text": "Fetch and process the latest invoice from the inbox."}]}}
+            ]
+          },
+          {
+            "turn_index": 1,
+            "events": [
+              {"author": "user", "content": {"role": "user", "parts": [{"text": "reject"}]}}
+            ]
+          },
+          {
+            "turn_index": 2,
+            "events": [
+              {"author": "user", "content": {"role": "user", "parts": [{"text": "send"}]}}
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "eval_case_id": "low_confidence_blurry_scan_review",
+      "prompt": {
+        "role": "user",
+        "parts": [{"text": "Process the latest invoice."}]
+      }
+    },
+    {
+      "eval_case_id": "hitl_reject_revise_send_zero_total",
+      "agent_data": {
+        "turns": [
+          {
+            "turn_index": 0,
+            "events": [
+              {"author": "user", "content": {"role": "user", "parts": [{"text": "Run the invoice pipeline."}]}}
+            ]
+          },
+          {
+            "turn_index": 1,
+            "events": [
+              {"author": "user", "content": {"role": "user", "parts": [{"text": "reject"}]}}
+            ]
+          },
+          {
+            "turn_index": 2,
+            "events": [
+              {"author": "user", "content": {"role": "user", "parts": [{"text": "Please make the tone more formal and add a note that resubmission with the corrected information is welcome."}]}}
+            ]
+          },
+          {
+            "turn_index": 3,
+            "events": [
+              {"author": "user", "content": {"role": "user", "parts": [{"text": "send"}]}}
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "eval_case_id": "hitl_approve_confirm_default_sample",
+      "agent_data": {
+        "turns": [
+          {
+            "turn_index": 0,
+            "events": [
+              {"author": "user", "content": {"role": "user", "parts": [{"text": "Please retrieve and process the latest invoice for review."}]}}
+            ]
+          },
+          {
+            "turn_index": 1,
+            "events": [
+              {"author": "user", "content": {"role": "user", "parts": [{"text": "I approve this invoice. Please proceed with posting to the financial system."}]}}
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "eval_case_id": "trigger_phrase_casual_confirm",
+      "prompt": {
+        "role": "user",
+        "parts": [{"text": "yes please go ahead with invoice processing"}]
+      }
+    },
+    {
+      "eval_case_id": "trigger_phrase_urgent_eom",
+      "prompt": {
+        "role": "user",
+        "parts": [{"text": "It's end of month — fetch and post the latest invoice immediately."}]
+      }
+    },
+    {
+      "eval_case_id": "trigger_phrase_explicit_mailbox",
+      "prompt": {
+        "role": "user",
+        "parts": [{"text": "Pull the latest invoice from our invoice inbox and validate it against our AP rules."}]
+      }
+    }
+  ]
+}

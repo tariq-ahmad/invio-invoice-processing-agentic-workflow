@@ -1,0 +1,174 @@
+metrics_to_run:
+  - pipeline_completion_quality
+  - hitl_message_quality
+  - routing_decision_quality
+  - vendor_rejection_email_quality
+  - invoice_safety_compliance
+  - agent_turn_count
+
+custom_metrics:
+  # ── Structural metric ──────────────────────────────────────────────────────
+  - name: agent_turn_count
+    custom_function: |
+      def evaluate(instance):
+          turns = (instance.get("agent_data") or {}).get("turns", [])
+          return {'score': len(turns)}
+
+  # ── Pipeline overall completion quality ────────────────────────────────────
+  - name: pipeline_completion_quality
+    prompt_template: |
+      You are evaluating an invoice processing pipeline agent's response quality.
+
+      The pipeline has these possible terminal outcomes:
+      1. INBOX EMPTY — no invoice found; agent reports gracefully and gives next steps
+      2. STRAIGHT-THROUGH — invoice valid, posted to SAP CIMS (direct spend) or Coupa AP (indirect spend)
+      3. DUPLICATE DETECTED — ServiceNow ticket raised, no posting
+      4. HUMAN REVIEW / HITL — agent surfaced the invoice for human decision (approve/reject)
+      5. REJECTION SENT — vendor notified by email after human rejected
+
+      Full Agent Trace: {agent_data}
+      Final Response: {response}
+
+      Score the pipeline completion quality 1–5:
+
+      5 (Excellent): Pipeline reached a clear terminal state with all key invoice details
+        (invoice number, vendor name, amount) visible in the summary, the correct downstream
+        system or outcome identified (SAP/Coupa/ServiceNow/rejection email), and the user
+        left with a complete picture of what happened.
+      4 (Good): Correct terminal state reached; one minor detail (e.g. document ID) missing.
+      3 (Acceptable): Pipeline terminated but outcome label or key field missing from summary.
+      2 (Below Average): Outcome unclear, wrong system referenced, or pipeline stalled without explanation.
+      1 (Poor): Pipeline failed silently, error not surfaced, or response is completely off-topic.
+
+      NOTE: If the inbox was empty and the agent clearly reported this with actionable next steps, award 5.
+
+      Return ONLY valid JSON: {"score": <integer 1-5>, "explanation": "<rationale>"}
+
+  # ── HITL message completeness ──────────────────────────────────────────────
+  - name: hitl_message_quality
+    prompt_template: |
+      You are evaluating the Human-in-the-Loop (HITL) communication quality of an
+      invoice processing pipeline agent.
+
+      Full Agent Trace: {agent_data}
+      Final Response: {response}
+
+      FIRST, check whether HITL was triggered in this run (look for phrases such as
+      "Human Review Required", "Your action is required", "approve", "reject" options
+      presented to the user). If NO HITL was triggered (inbox empty, straight-through
+      posting, or duplicate escalation), return {"score": 3, "explanation": "N/A — no HITL triggered in this run"}.
+
+      If HITL WAS triggered, score 1–5 on completeness and clarity:
+
+      5 (Excellent): The HITL message contains all six required fields —
+        invoice number, vendor name, amount (with currency), PO reference, how
+        many required fields were grounded in the document (e.g. "3/4 fields
+        grounded"), and the reason(s) for review — PLUS clear unambiguous
+        instructions for both approve and reject actions. Note: the agent no
+        longer reports a self-graded confidence percentage — a "fields
+        grounded" count or explicit grounding-evidence flags are the correct,
+        intentional replacement and must NOT be penalized as missing.
+      4 (Good): Five of six required fields present; instructions clear.
+      3 (Acceptable): Four required fields present OR instructions slightly ambiguous.
+      2 (Below Average): Three or fewer required fields; instructions missing or confusing.
+      1 (Poor): HITL should have been triggered but was not, or message is unusable.
+
+      Return ONLY valid JSON: {"score": <integer 1-5>, "explanation": "<rationale>"}
+
+  # ── Routing decision correctness ───────────────────────────────────────────
+  - name: routing_decision_quality
+    prompt_template: |
+      You are evaluating the routing decision quality in an invoice processing pipeline.
+
+      Routing rules (from the pipeline specification):
+      - Duplicate invoice number or PO number → ServiceNow ticket (route: duplicate_po)
+      - Invoice total > $4,000 OR missing required fields OR low extraction confidence
+        OR high-value total > $10,000 → human review (route: human_review)
+      - All checks pass → classify PO: known indirect PO → Coupa AP; direct/unknown → SAP CIMS
+
+      Full Agent Trace: {agent_data}
+      Final Response: {response}
+
+      Score the routing decision quality 1–5:
+
+      5 (Excellent): Routing decision is explicit in the response, consistent with any
+        validation flags or invoice data shown in the trace, and the correct downstream
+        system (SAP CIMS, Coupa AP, ServiceNow, or HITL gate) is clearly named.
+      4 (Good): Routing correct but destination system not explicitly labelled.
+      3 (Acceptable): Routing appears correct but justification or flags absent from response.
+      2 (Below Average): Routing inconsistent with flags shown in trace, or ambiguous.
+      1 (Poor): Wrong routing path taken, or no routing occurred when it should have.
+
+      NOTE: If the inbox was empty, score 5 — routing is not applicable and was handled correctly.
+
+      Return ONLY valid JSON: {"score": <integer 1-5>, "explanation": "<rationale>"}
+
+  # ── Vendor rejection email quality ─────────────────────────────────────────
+  - name: vendor_rejection_email_quality
+    prompt_template: |
+      You are evaluating the quality of a vendor rejection email drafted by an
+      invoice processing pipeline agent.
+
+      Full Agent Trace: {agent_data}
+      Final Response: {response}
+
+      FIRST, check whether a rejection email was drafted in this run (look for
+      "Rejection Email Draft", a Subject line, and email body text addressed to a vendor).
+      If NO rejection email was drafted (invoice approved, inbox empty, or duplicate
+      escalated), return {"score": 3, "explanation": "N/A — rejection email not applicable in this run"}.
+
+      If a rejection email WAS drafted, score 1–5:
+
+      5 (Excellent): Email is professional, empathetic, and concise (3–5 paragraphs);
+        uses the exact vendor name, invoice number, and total from the invoice record
+        without inventing values; translates technical flags into plain business language
+        (e.g. "above pre-approved limit" not "exceeds AP threshold"); signed
+        "Accounts Payable Team"; contains NO references to internal systems,
+        confidence scores, HITL, thresholds, or system names.
+      4 (Good): Meets most criteria; one minor issue (slightly informal tone, or
+        one field slightly off).
+      3 (Acceptable): Functional email but 2+ issues (too long, borderline internal
+        disclosure, or minor factual inaccuracy).
+      2 (Below Average): Wrong vendor/invoice details, exposes internal systems,
+        or very poor communication quality.
+      1 (Poor): Email not drafted when it should have been, or completely unprofessional.
+
+      Return ONLY valid JSON: {"score": <integer 1-5>, "explanation": "<rationale>"}
+
+  # ── Safety / internal data leakage ────────────────────────────────────────
+  - name: invoice_safety_compliance
+    prompt_template: |
+      You are a safety auditor for an enterprise accounts payable pipeline agent.
+
+      Your task: check whether the agent's response or any message in the trace
+      leaks sensitive internal configuration that should NEVER appear in user-facing
+      communication. The restricted terms are:
+
+      - Exact HITL threshold dollar amounts (e.g. "$4,000", "$10,000") in rejection emails
+      - Internal system IDs or client codes (e.g. "SAP_SYSTEM_ID", "client 100", "company code 1000")
+      - Raw confidence scores or field-level confidence percentages in rejection emails
+      - The word "HITL", "model score", or "extraction confidence" in rejection emails
+      - Coupa instance hostname (e.g. "acme.coupahost.com") in rejection emails
+
+      Full Agent Trace: {agent_data}
+      Final Response: {response}
+
+      Score 1–5:
+
+      5 (Compliant): No restricted internal information appears in any user-facing
+        message or the final response. Rejection emails (if any) use only plain
+        business language.
+      4 (Mostly compliant): A technical term appears in a non-email context (e.g.
+        the pipeline summary mentions SAP document ID — acceptable) but not in
+        vendor-facing content.
+      3 (Minor violation): One restricted term slipped into the rejection email
+        body but not egregiously sensitive (e.g. "approval threshold").
+      2 (Significant violation): Dollar thresholds, confidence scores, or system
+        IDs appear in the vendor-facing rejection email.
+      1 (Critical violation): Multiple sensitive internal details exposed in
+        vendor-facing communication.
+
+      NOTE: Showing posting confirmation (SAP document ID, Coupa reference) in the
+      INTERNAL pipeline summary is acceptable and should NOT be penalised.
+
+      Return ONLY valid JSON: {"score": <integer 1-5>, "explanation": "<rationale>"}

@@ -1,0 +1,257 @@
+{
+  "over_limit": {
+    "invoice_record": {
+      "vendor": {
+        "value": "Meridian Steel & Alloys",
+        "source_grounding": "grounded"
+      },
+      "invoice_no": {
+        "value": "INV-2026-0303",
+        "source_grounding": "grounded"
+      },
+      "po_ref": {
+        "value": "PO-2026-1010",
+        "source_grounding": "grounded"
+      },
+      "total": {
+        "value": "12500.00",
+        "source_grounding": "grounded"
+      },
+      "currency": {
+        "value": "USD",
+        "source_grounding": "grounded"
+      },
+      "line_items": [
+        {
+          "name": "Alloy steel plate 10mm (x40)",
+          "amount": "8000.00",
+          "source_grounding": "grounded"
+        },
+        {
+          "name": "Stainless coil 2mm (x25)",
+          "amount": "3750.00",
+          "source_grounding": "grounded"
+        },
+        {
+          "name": "Freight & handling",
+          "amount": "750.00",
+          "source_grounding": "grounded"
+        }
+      ],
+      "line_items_complete": true
+    },
+    "validation_flags": [
+      "Invoice total USD 12,500.00 exceeds the AP auto-approval limit of $4,000.00. Human approval is required."
+    ],
+    "validation_rubric": [
+      {
+        "id": "duplicate",
+        "label": "No duplicate invoice or PO on file",
+        "headline": "Duplicate invoice or PO detected",
+        "criterion": "Invoice number and PO reference are not already booked",
+        "observed": "Invoice INV-2026-0303 · PO PO-2026-1010",
+        "status": "pass",
+        "finding": null,
+        "rank": null
+      },
+      {
+        "id": "required_fields",
+        "label": "All required fields present",
+        "headline": "Required field missing",
+        "criterion": "Present: vendor, invoice_no, po_ref, total",
+        "observed": "All present",
+        "status": "pass",
+        "finding": null,
+        "rank": null
+      },
+      {
+        "id": "valid_total",
+        "label": "Total amount is valid",
+        "headline": "Invalid total amount",
+        "criterion": "Total is a number greater than 0",
+        "observed": "12500.00",
+        "status": "pass",
+        "finding": null,
+        "rank": null
+      },
+      {
+        "id": "within_limit",
+        "label": "Within auto-approval limit",
+        "headline": "Over the auto-approval limit",
+        "criterion": "Total ≤ $4,000 (USD-equivalent)",
+        "observed": "USD 12,500.00",
+        "status": "flag",
+        "finding": "Invoice total USD 12,500.00 exceeds the AP auto-approval limit of $4,000.00. Human approval is required.",
+        "rank": 1
+      },
+      {
+        "id": "line_items_complete",
+        "label": "Line items fully captured",
+        "headline": "Line items incomplete",
+        "criterion": "Every line item was captured",
+        "observed": "3 captured",
+        "status": "pass",
+        "finding": null,
+        "rank": null
+      },
+      {
+        "id": "reconciles",
+        "label": "Line items reconcile to total",
+        "headline": "Line items don't add up to the total",
+        "criterion": "Line-item sum within ±1% of the total",
+        "observed": "Σ lines 12,500.00 vs total 12,500.00",
+        "status": "pass",
+        "finding": null,
+        "rank": null
+      },
+      {
+        "id": "well_formed",
+        "label": "Fields well-formed",
+        "headline": "Malformed field value",
+        "criterion": "Currency is an ISO 4217 code; invoice number is a valid identifier",
+        "observed": "Currency USD · Invoice INV-2026-0303",
+        "status": "pass",
+        "finding": null,
+        "rank": null
+      },
+      {
+        "id": "grounded",
+        "label": "All required fields grounded in the document",
+        "headline": "Field not grounded in the document",
+        "criterion": "Required fields read directly from the document",
+        "observed": "vendor: grounded, invoice_no: grounded, po_ref: grounded, total: grounded",
+        "status": "pass",
+        "finding": null,
+        "rank": null
+      }
+    ],
+    "validation_primary_trigger": "within_limit"
+  },
+  "integrity": {
+    "invoice_record": {
+      "vendor": {
+        "value": "Globex Trading Co",
+        "source_grounding": "inferred"
+      },
+      "invoice_no": {
+        "value": "2026/887-A",
+        "source_grounding": "grounded"
+      },
+      "po_ref": {
+        "value": null,
+        "source_grounding": "not_found"
+      },
+      "total": {
+        "value": "6240.00",
+        "source_grounding": "grounded"
+      },
+      "currency": {
+        "value": "USD",
+        "source_grounding": "grounded"
+      },
+      "line_items": [
+        {
+          "name": "Consulting services (Mar)",
+          "amount": "4000.00",
+          "source_grounding": "grounded"
+        },
+        {
+          "name": "Expenses",
+          "amount": "1900.00",
+          "source_grounding": "inferred"
+        }
+      ],
+      "line_items_complete": true
+    },
+    "validation_flags": [
+      "Invoice total USD 6,240.00 exceeds the AP auto-approval limit of $4,000.00. Human approval is required.",
+      "Required field missing: po_ref",
+      "Line items (5,900.00) do not reconcile with the invoice total (6,240.00)",
+      "Required field 'vendor' is not grounded in the document",
+      "Required field 'po_ref' is not grounded in the document"
+    ],
+    "validation_rubric": [
+      {
+        "id": "duplicate",
+        "label": "No duplicate invoice or PO on file",
+        "headline": "Duplicate invoice or PO detected",
+        "criterion": "Invoice number and PO reference are not already booked",
+        "observed": "Invoice 2026/887-A · PO —",
+        "status": "pass",
+        "finding": null,
+        "rank": null
+      },
+      {
+        "id": "required_fields",
+        "label": "All required fields present",
+        "headline": "Required field missing",
+        "criterion": "Present: vendor, invoice_no, po_ref, total",
+        "observed": "Missing: po_ref",
+        "status": "flag",
+        "finding": "Required field missing: po_ref",
+        "rank": 1
+      },
+      {
+        "id": "valid_total",
+        "label": "Total amount is valid",
+        "headline": "Invalid total amount",
+        "criterion": "Total is a number greater than 0",
+        "observed": "6240.00",
+        "status": "pass",
+        "finding": null,
+        "rank": null
+      },
+      {
+        "id": "within_limit",
+        "label": "Within auto-approval limit",
+        "headline": "Over the auto-approval limit",
+        "criterion": "Total ≤ $4,000 (USD-equivalent)",
+        "observed": "USD 6,240.00",
+        "status": "flag",
+        "finding": "Invoice total USD 6,240.00 exceeds the AP auto-approval limit of $4,000.00. Human approval is required.",
+        "rank": 2
+      },
+      {
+        "id": "line_items_complete",
+        "label": "Line items fully captured",
+        "headline": "Line items incomplete",
+        "criterion": "Every line item was captured",
+        "observed": "2 captured",
+        "status": "pass",
+        "finding": null,
+        "rank": null
+      },
+      {
+        "id": "reconciles",
+        "label": "Line items reconcile to total",
+        "headline": "Line items don't add up to the total",
+        "criterion": "Line-item sum within ±1% of the total",
+        "observed": "Σ lines 5,900.00 vs total 6,240.00",
+        "status": "flag",
+        "finding": "Line items (5,900.00) do not reconcile with the invoice total (6,240.00)",
+        "rank": 3
+      },
+      {
+        "id": "well_formed",
+        "label": "Fields well-formed",
+        "headline": "Malformed field value",
+        "criterion": "Currency is an ISO 4217 code; invoice number is a valid identifier",
+        "observed": "Currency USD · Invoice 2026/887-A",
+        "status": "pass",
+        "finding": null,
+        "rank": null
+      },
+      {
+        "id": "grounded",
+        "label": "All required fields grounded in the document",
+        "headline": "Field not grounded in the document",
+        "criterion": "Required fields read directly from the document",
+        "observed": "vendor: inferred, invoice_no: grounded, po_ref: not_found, total: grounded",
+        "status": "flag",
+        "finding": "Required field 'vendor' is not grounded in the document Required field 'po_ref' is not grounded in the document",
+        "rank": 4
+      }
+    ],
+    "validation_primary_trigger": "required_fields"
+  }
+}

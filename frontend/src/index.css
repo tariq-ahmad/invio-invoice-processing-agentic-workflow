@@ -1,0 +1,571 @@
+@import "tailwindcss";
+
+/* A2UI official renderer base styles. The package exports map doesn't expose
+   this CSS as a specifier, so we import it by path into node_modules. */
+@import "../node_modules/@a2ui/react/v0_9/index.css";
+
+/* ════════════════════════════════════════════════════════════════════════════
+   Design tokens
+   One accent ("iris" violet) + one completion green. Status hues (amber for
+   attention, rose for stopped) are reserved for meaning, never decoration.
+   Light/dark are two token sets — no per-component overrides.
+   ════════════════════════════════════════════════════════════════════════════ */
+@theme {
+  /* Surfaces: deep graphite with a faint violet undertone */
+  --color-ink-950: #09090f;
+  --color-ink-900: #0e0e16;
+  --color-ink-850: #13131c;
+  --color-ink-800: #1a1a26;
+
+  /* Accent: iris */
+  --color-brand-50: #f5f3ff;
+  --color-brand-100: #ede9fe;
+  --color-brand-200: #ddd6fe;
+  --color-brand-300: #c4b5fd;
+  --color-brand-400: #a78bfa;
+  --color-brand-500: #7c5cf5;
+  --color-brand-600: #6a46e8;
+  --color-brand-700: #5632c8;
+
+  /* Cool partner hue — only used as the far end of accent gradients */
+  --color-accent-400: #8aa2ff;
+  --color-accent-500: #6b86ff;
+
+  /* Legacy aliases: every "live"/"ai" utility follows the single accent */
+  --color-live-200: var(--color-brand-200);
+  --color-live-300: var(--color-brand-300);
+  --color-live-400: var(--color-brand-400);
+  --color-live-500: var(--color-brand-500);
+  --color-live-600: var(--color-brand-600);
+  --color-ai-blue: var(--color-brand-400);
+  --color-ai-violet: var(--color-brand-500);
+  --color-ai-emerald: var(--color-brand-600);
+
+  /* Completion green — the ONLY non-accent brand hue: "done" in the pipeline */
+  --color-done-300: #6ee7b7;
+  --color-done-400: #34d399;
+  --color-done-500: #10b981;
+  --color-done-600: #059669;
+
+  /* Muted text on dark — lifted from slate default so 11–12px labels pass AA */
+  --color-slate-500: #8590a6;
+  --color-slate-600: #5d687d;
+
+  --font-sans: "Inter Variable", "Inter", system-ui, -apple-system, "Segoe UI", Arial, sans-serif;
+  --font-mono: "JetBrains Mono Variable", "JetBrains Mono", ui-monospace, "Cascadia Code", Consolas, monospace;
+
+  /* Motion */
+  --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-standard: cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Semantic hairlines / washes — these flip per theme (replace white/NN). */
+@theme inline {
+  --color-line: var(--c-line);
+  --color-line-strong: var(--c-line-strong);
+  --color-line-bold: var(--c-line-bold);
+  --color-wash: var(--c-wash);
+  --color-wash-strong: var(--c-wash-strong);
+  --color-wash-bold: var(--c-wash-bold);
+}
+
+/* ── Dark (default) ──────────────────────────────────────────────────────── */
+:root {
+  color-scheme: dark;
+
+  --c-line: rgba(255, 255, 255, 0.07);
+  --c-line-strong: rgba(255, 255, 255, 0.12);
+  --c-line-bold: rgba(255, 255, 255, 0.22);
+  --c-wash: rgba(255, 255, 255, 0.035);
+  --c-wash-strong: rgba(255, 255, 255, 0.07);
+  --c-wash-bold: rgba(255, 255, 255, 0.14);
+
+  /* Pipeline graph track: solid colour + group opacity (see PipelineTimeline) */
+  --track: #ffffff;
+  --track-opacity: 0.22;
+
+  --surface: #13131c;
+  --surface-raised: #181824;
+  --glass-bg: rgba(19, 19, 28, 0.72);
+  --glass-border: rgba(255, 255, 255, 0.09);
+  --header-bg: rgba(10, 10, 16, 0.72);
+
+  --shadow-card: 0 1px 0 rgba(255, 255, 255, 0.04) inset, 0 10px 28px -14px rgba(0, 0, 0, 0.7);
+  --shadow-raised: 0 1px 0 rgba(255, 255, 255, 0.05) inset, 0 22px 50px -20px rgba(0, 0, 0, 0.8);
+
+  --text-body: #e7e8f0;
+  --text-heading: #f4f5fa;
+
+  --page-glow-1: rgba(124, 92, 245, 0.17);
+  --page-glow-2: rgba(107, 134, 255, 0.09);
+  --scroll-thumb: rgba(167, 139, 250, 0.22);
+  --grad-text-from: #ddd6fe;
+  --grad-text-to: #a78bfa;
+}
+
+/* ── Light ───────────────────────────────────────────────────────────────── */
+[data-theme="light"] {
+  --color-ink-950: #f3f3f8;
+  --color-ink-900: #ffffff;
+  --color-ink-850: #ffffff;
+  --color-ink-800: #f1f1f7;
+
+  --c-line: rgba(18, 18, 40, 0.08);
+  --c-line-strong: rgba(18, 18, 40, 0.12);
+  --c-line-bold: rgba(18, 18, 40, 0.22);
+  --c-wash: rgba(18, 18, 40, 0.03);
+  --c-wash-strong: rgba(18, 18, 40, 0.055);
+  --c-wash-bold: rgba(18, 18, 40, 0.1);
+
+  --track: #121228;
+  --track-opacity: 0.22;
+
+  --surface: #ffffff;
+  --surface-raised: #ffffff;
+  --glass-bg: rgba(255, 255, 255, 0.92);
+  --glass-border: rgba(18, 18, 40, 0.09);
+  --header-bg: rgba(255, 255, 255, 0.8);
+
+  --shadow-card: 0 1px 2px rgba(18, 18, 40, 0.06), 0 6px 20px -10px rgba(18, 18, 40, 0.14);
+  --shadow-raised: 0 2px 4px rgba(18, 18, 40, 0.06), 0 18px 40px -16px rgba(18, 18, 40, 0.2);
+
+  --text-body: #1c1d2e;
+  --text-heading: #0d0e1c;
+
+  --page-glow-1: rgba(124, 92, 245, 0.09);
+  --page-glow-2: rgba(107, 134, 255, 0.06);
+  --scroll-thumb: rgba(106, 70, 232, 0.22);
+  --grad-text-from: #5632c8;
+  --grad-text-to: #7c5cf5;
+
+  /* Text ramps remapped so existing `text-*-NNN` utilities read on white.
+     (Tailwind v4 utilities resolve through these variables — no !important.) */
+  --color-slate-50: #0d0e1c;
+  --color-slate-100: #1c1d2e;
+  --color-slate-200: #30324a;
+  --color-slate-300: #484b66;
+  --color-slate-400: #5f6379;
+  --color-slate-500: #70748a;
+  --color-slate-600: #9a9eb0;
+
+  --color-brand-200: #4f2fd0;
+  --color-brand-300: #5d3fe0;
+  --color-brand-400: #7a5af8;
+
+  --color-done-300: #047857;
+  --color-done-400: #059669;
+  --color-done-500: #059669;
+  --color-done-600: #047857;
+
+  --color-amber-100: #78350f;
+  --color-amber-200: #92400e;
+  --color-amber-300: #b45309;
+  --color-amber-400: #d97706;
+
+  --color-rose-100: #9f1239;
+  --color-rose-200: #be123c;
+  --color-rose-300: #be123c;
+  --color-rose-400: #e11d48;
+
+  --color-teal-200: #0f766e;
+  --color-teal-300: #0f766e;
+  --color-teal-400: #0d9488;
+  --color-sky-300: #0369a1;
+  --color-sky-400: #0284c7;
+  --color-emerald-400: #059669;
+  --color-orange-300: #c2410c;
+
+  --color-violet-100: #5b21b6;
+  --color-violet-200: #6d28d9;
+  --color-violet-300: #7c3aed;
+  --color-violet-400: #8b5cf6;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+}
+
+/* 16px base: laptop-first density. */
+html {
+  font-size: 16px;
+  scroll-behavior: auto;
+}
+
+body {
+  margin: 0;
+  background: var(--color-ink-950);
+  color: var(--text-body);
+  font-family: var(--font-sans);
+  font-feature-settings: "cv11", "ss01"; /* Inter: single-storey a, open digits */
+  font-variant-numeric: tabular-nums; /* align $/tokens/%/latency columns */
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+::selection {
+  background: rgba(124, 92, 245, 0.35);
+}
+
+/* One consistent keyboard-focus ring everywhere. Inputs keep their own
+   border+ring treatment, so they are excluded. */
+:where(button, a, summary, [role="button"], [role="switch"], [role="separator"], [tabindex]):focus-visible {
+  outline: 2px solid var(--color-brand-400);
+  outline-offset: 2px;
+  border-radius: 0.5rem;
+}
+
+/* ─── Scrollbar ──────────────────────────────────────────────────────────── */
+.scroll-slim {
+  scrollbar-width: thin;
+  scrollbar-color: var(--scroll-thumb) transparent;
+}
+.scroll-slim::-webkit-scrollbar {
+  width: 8px;
+}
+.scroll-slim::-webkit-scrollbar-thumb {
+  background: var(--scroll-thumb);
+  border-radius: 9999px;
+}
+.scroll-slim::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+/* ─── Surface utilities ──────────────────────────────────────────────────── */
+
+/* Opaque card: the one surface treatment for every result/step card. */
+@utility card {
+  background: var(--surface);
+  border: 1px solid var(--c-line-strong);
+  border-radius: 1rem;
+  box-shadow: var(--shadow-card);
+}
+
+/* Translucent inset surface (inputs, panels, chips). No backdrop blur. */
+@utility glass {
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+}
+
+/* Hero card (final result). */
+@utility glass-elevated {
+  background: var(--surface-raised);
+  border: 1px solid var(--c-line-strong);
+  box-shadow: var(--shadow-raised);
+}
+
+/* The only blurred surface in the app: the sticky header (and modals). */
+@utility glass-blur {
+  background: var(--header-bg);
+  -webkit-backdrop-filter: blur(14px) saturate(1.2);
+  backdrop-filter: blur(14px) saturate(1.2);
+}
+
+/* Floating bar that sits over scrolling content: a faint accent wash on a
+   translucent, blurred surface, with a soft shadow instead of a hard edge. */
+@utility glass-float {
+  background:
+    linear-gradient(135deg, color-mix(in srgb, var(--color-brand-500) 8%, transparent), transparent 55%),
+    color-mix(in srgb, var(--surface) 82%, transparent);
+  -webkit-backdrop-filter: blur(16px) saturate(1.4);
+  backdrop-filter: blur(16px) saturate(1.4);
+  border: 1px solid var(--c-line-strong);
+  box-shadow: var(--shadow-card);
+}
+
+/* Static accent-clipped text for the product mark and hero headings. */
+@utility text-gradient {
+  background: linear-gradient(100deg, var(--grad-text-from) 0%, var(--grad-text-to) 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: transparent;
+}
+
+/* Accent hairline ring. Static by default (cheap); add `.is-live` on the one
+   card that is waiting on the user to get the slow rotating sweep. */
+@utility gradient-border {
+  position: relative;
+}
+.gradient-border::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  padding: 1px;
+  background: conic-gradient(
+    from var(--gb-angle, 0deg),
+    var(--color-brand-400),
+    var(--color-accent-500),
+    var(--color-brand-600),
+    var(--color-brand-400)
+  );
+  opacity: 0.55;
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  mask-composite: exclude;
+  pointer-events: none;
+}
+.gradient-border.is-live::before {
+  opacity: 1;
+  animation: border-rotate 7s linear infinite;
+}
+
+/* ─── Keyframes ───────────────────────────────────────────────────────────── */
+
+@property --gb-angle {
+  syntax: "<angle>";
+  initial-value: 0deg;
+  inherits: false;
+}
+
+@keyframes border-rotate {
+  to {
+    --gb-angle: 360deg;
+  }
+}
+
+/* Flowing dashes along an active edge — reads as data traveling to the node */
+@keyframes edge-flow {
+  to {
+    stroke-dashoffset: -14;
+  }
+}
+.edge-flow {
+  stroke-dasharray: 5 9;
+  animation: edge-flow 0.8s linear infinite;
+}
+
+/* Gentle "listening" breath — transform/opacity only. */
+@keyframes breathe {
+  0%,
+  100% {
+    transform: scale(1);
+    opacity: 0.55;
+  }
+  50% {
+    transform: scale(1.22);
+    opacity: 0;
+  }
+}
+.anim-breathe {
+  animation: breathe 3.2s var(--ease-standard) infinite;
+}
+
+/* Hover-card entrance. */
+@keyframes tip-in {
+  from {
+    opacity: 0;
+    transform: translateY(2px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+.tip-in {
+  animation: tip-in 0.14s var(--ease-out-expo);
+}
+
+/* One-shot highlight when the user jumps to a card from the graph. */
+@keyframes feed-flash {
+  0% {
+    box-shadow: 0 0 0 0 color-mix(in srgb, var(--color-brand-400) 55%, transparent);
+  }
+  100% {
+    box-shadow: 0 0 0 14px transparent;
+  }
+}
+.feed-flash [data-fold-inner] > *,
+.feed-flash > [data-fold-row] {
+  animation: feed-flash 1.3s var(--ease-out-expo);
+  border-radius: 1rem;
+}
+
+/* Skeleton placeholders: a soft sweep drawn with transform only (no repaint). */
+.skel {
+  position: relative;
+  overflow: hidden;
+  background: var(--c-wash-strong);
+}
+.skel::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  transform: translateX(-100%);
+  background: linear-gradient(90deg, transparent, var(--c-wash-bold), transparent);
+  animation: skel-sweep 1.5s ease-in-out infinite;
+}
+@keyframes skel-sweep {
+  to {
+    transform: translateX(100%);
+  }
+}
+
+/* Sonar ping — a ring that expands and fades while a scan is live. */
+@keyframes sonar {
+  0% {
+    transform: scale(0.9);
+    opacity: 0.55;
+  }
+  70% {
+    opacity: 0.08;
+  }
+  100% {
+    transform: scale(1.75);
+    opacity: 0;
+  }
+}
+.anim-sonar {
+  animation: sonar 3s var(--ease-out-expo) infinite;
+}
+
+/* ─── Markdown prose tuning inside chat bubbles ──────────────────────────── */
+.prose-chat {
+  line-height: 1.55;
+}
+.prose-chat h2 {
+  font-size: 1.05rem;
+  font-weight: 600;
+  margin: 0.25rem 0 0.5rem;
+  color: var(--text-heading);
+}
+.prose-chat h3 {
+  font-size: 0.95rem;
+  font-weight: 600;
+  margin: 0.5rem 0 0.25rem;
+  color: var(--text-heading);
+}
+.prose-chat table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  margin: 0.5rem 0;
+  font-size: 0.85rem;
+  border: 1px solid var(--c-line-strong);
+  border-radius: 0.6rem;
+  overflow: hidden;
+}
+.prose-chat th,
+.prose-chat td {
+  border-bottom: 1px solid var(--c-line);
+  padding: 0.45rem 0.7rem;
+  text-align: left;
+}
+.prose-chat tr:last-child td {
+  border-bottom: none;
+}
+.prose-chat th {
+  background: var(--c-wash-strong);
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--color-slate-400);
+}
+
+/* Policy checks — color only the result word, never the whole row. */
+.prose-chat td.policy-flag-cell {
+  color: var(--color-amber-300);
+  font-weight: 600;
+}
+.prose-chat td.policy-pass-cell {
+  color: var(--color-done-400);
+  font-weight: 600;
+}
+
+.prose-chat code {
+  background: var(--c-wash-strong);
+  padding: 0.1rem 0.35rem;
+  border-radius: 0.3rem;
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+}
+.prose-chat hr {
+  border: none;
+  border-top: 1px solid var(--c-line);
+  margin: 0.6rem 0;
+}
+.prose-chat p {
+  margin: 0.35rem 0;
+}
+.prose-chat ul {
+  margin: 0.35rem 0;
+  padding-left: 1.1rem;
+  list-style: disc;
+}
+
+/* ─── Respect reduced-motion: stop all loops, collapse transitions ───────── */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* ─── Print: a clean report of the run ───────────────────────────────────────
+   The Export menu / Ctrl+P switches to the light theme first (usePrintTheme).
+   Everything interactive is hidden, folded steps are shown in full, and the
+   app's fixed-height panes are released so the whole feed can paginate. */
+@media print {
+  @page {
+    margin: 14mm;
+  }
+  html,
+  body,
+  #root {
+    height: auto !important;
+    background: #fff !important;
+  }
+  * {
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+    animation: none !important;
+    transition: none !important;
+    -webkit-backdrop-filter: none !important;
+    backdrop-filter: none !important;
+  }
+  .no-print,
+  .app-aside,
+  [data-fold-row],
+  [data-fold-toggle] {
+    display: none !important;
+  }
+  .app-shell,
+  .app-main,
+  .app-pane,
+  .app-feed {
+    display: block !important;
+    height: auto !important;
+    min-height: 0 !important;
+    overflow: visible !important;
+    padding: 0 !important;
+    border: 0 !important;
+    background: none !important;
+    box-shadow: none !important;
+  }
+  .app-feed > * {
+    margin-bottom: 12px;
+  }
+  [data-fold-body] {
+    display: block !important;
+  }
+  [data-fold-inner] {
+    overflow: visible !important;
+  }
+  [data-feed-item],
+  .card,
+  #result-card {
+    break-inside: avoid;
+    box-shadow: none !important;
+  }
+  .gradient-border::before {
+    display: none;
+  }
+}

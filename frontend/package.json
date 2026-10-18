@@ -1,0 +1,39 @@
+{
+  "name": "ap-copilot-frontend",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "description": "AP Copilot — polished A2UI demo UI for the invoice-processing agent",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc -b && vite build",
+    "preview": "vite preview",
+    "typecheck": "tsc -b --noEmit",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@a2ui/react": "^0.10.1",
+    "@fontsource-variable/inter": "^5.3.0",
+    "@fontsource-variable/jetbrains-mono": "^5.3.0",
+    "canvas-confetti": "^1.9.3",
+    "framer-motion": "^12.23.12",
+    "react": "^19.2.0",
+    "react-dom": "^19.2.0",
+    "react-markdown": "^9.0.1",
+    "remark-gfm": "^4.0.0",
+    "zustand": "^5.0.2"
+  },
+  "devDependencies": {
+    "@tailwindcss/vite": "^4.1.0",
+    "@types/canvas-confetti": "^1.9.0",
+    "@types/node": "^22.10.0",
+    "@types/react": "^19.2.0",
+    "@types/react-dom": "^19.2.0",
+    "@vitejs/plugin-react": "^5.0.0",
+    "happy-dom": "^21.0.1",
+    "tailwindcss": "^4.1.0",
+    "typescript": "^5.7.2",
+    "vite": "^7.0.0",
+    "vitest": "^5.0.4"
+  }
+}
